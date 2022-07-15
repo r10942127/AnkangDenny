@@ -9,20 +9,18 @@ function thre = threshold_noise_signal(rsmooth)
         fr = min_level+(s-1)*step_size;
         ce = min_level+s*step_size;
         area = ce^2-fr^2;
-        step_record(s) = sum((abs_rsmooth>=fr)&(abs_rsmooth<ce))/1;
+        step_record(s) = sum((abs_rsmooth>=fr)&(abs_rsmooth<ce))/area;
     end
     figure()
     plot(step_record)
-    [val0,index0] = max(step_record);
-    step_record = step_record(index0:end);
-    flag = 1;
-    i=1;
-    while(flag && (i<length(step_record)-4))
-        if (step_record(i)<step_record(i+1))&&(step_record(i)<step_record(i+2))&&(step_record(i)<step_record(i+3))&&(step_record(i)<step_record(i+4))&&(step_record(i)<step_record(i+5))
-            index1 = i;
-            flag=0;
-        end
-        i = i+1;
-    end
-    thre = (index0+index1)*step_size + min_level;
+    title('thre_noise_thre')
+    step_record = step_record(step_record>700);
+    diff_record = step_record(4:end)-step_record(1:end-3);
+    [aaaa,index1] = min(diff_record);
+    record1 = diff_record(index1:end);
+    [aaaa,index2] = max(diff_record);
+    index3 =3 + index1 + index2*2/3;
+    disp('thre:')
+    disp(index3)
+    thre = (index3)*step_size + min_level;
 end

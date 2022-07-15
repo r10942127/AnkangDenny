@@ -1,10 +1,15 @@
-function frame = FACCH(rsmooth,IPOINT,Tsy,rcpul)
+function frame = FACCH(rsmooth,Tsy)
     frame = 0;
+    figure()
+    plot(abs(rsmooth))
+    title('FACCH')
+    rsmooth_0 = rsmooth;
     [start_point_set,end_point_set] = decide_message_span(abs(rsmooth));
     disp(start_point_set)
     disp(end_point_set)
-    interval_length = 4e4;
+    interval_length = 5e4;
     for point=1:length(start_point_set)
+        rsmooth = rsmooth_0;
         data = rsmooth(start_point_set(point):end_point_set(point));
         total_length = (end_point_set(point)-start_point_set(point));
         final_step = floor(total_length/interval_length);
@@ -14,13 +19,10 @@ function frame = FACCH(rsmooth,IPOINT,Tsy,rcpul)
             else
                 short_rsmooth = data((step-1)*interval_length+1:step*interval_length);
             end
-            [CFO,threshold,threshold2] = second_CFO(short_rsmooth,IPOINT,Tsy,rcpul);
-            rsmooth = short_rsmooth.* exp(-1i * 2 * pi * CFO * (1:length(short_rsmooth)) * Tsy / IPOINT);
+
+            [CFO,threshold,threshold2] = second_CFO(short_rsmooth,Tsy);
+            rsmooth = short_rsmooth.* exp(-1i * 2 * pi * CFO * (1:length(short_rsmooth)) * Tsy);
             
-            
-            rsmoothhhh = reshape(rsmooth,IPOINT,[]);
-            [maxx,indexx] = max(mean(abs(rsmoothhhh),2));
-            rsmooth = rsmoothhhh(indexx,:);
             rsmoothhhh = rsmooth(abs(rsmooth)>threshold2);
             rsmoothhhh = abs(rsmoothhhh).*power(exp(1i*angle(rsmoothhhh)),8);
             center = mean(real(rsmoothhhh)) + 1i*mean(imag(rsmoothhhh));
@@ -43,8 +45,6 @@ function frame = FACCH(rsmooth,IPOINT,Tsy,rcpul)
             end
             
             find_burst = stop_point - start_point;
-            figure()
-            plot(find_burst)
             start_point = start_point(find_burst>=192);
             stop_point = stop_point(find_burst>=192);
             
@@ -63,13 +63,11 @@ function frame = FACCH(rsmooth,IPOINT,Tsy,rcpul)
                
                 result = [result tmp2];
             end
-            if (length(start_point)>0)
+            if (length(result)>0)
                 check = conv(fliplr(pilot),result);
-                disp('point')
-                disp(point)
                 figure()
                 plot(check);
-                
+                title(point)
             end
         end
     end

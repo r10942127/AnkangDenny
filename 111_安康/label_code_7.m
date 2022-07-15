@@ -71,7 +71,9 @@ for i = 1:24
         for j = 1:length(q)
             qq = [qq q(j):q(j)+length(pilot)-1];
         end
-        Decode_symbols = [Decode_symbols tmp2(qq)];
+        if (qq<400)
+            Decode_symbols = [Decode_symbols tmp2(qq)];
+        end
         return
     end 
 

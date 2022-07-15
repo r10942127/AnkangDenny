@@ -63,18 +63,35 @@ nfs=intfac * new_fs;
 L=6;   
 rolloff=0.3;                          
 rcpul=rcosdesign(rolloff,L,IPOINT,'sqrt');
+rsmooth0 = rsmooth;
+rsmooth=conv(rsmooth,rcpul);
+rsmooth=rsmooth/mean(abs(rsmooth));
+rsmooth = rsmooth(1:end-mod(length(rsmooth),IPOINT));
+rsmooth = reshape(rsmooth,IPOINT,[]);
+[maxx,indexx] = max(mean(abs(rsmooth),2));
+rsmooth = rsmooth(indexx,:);
 
 %% Part 4. 1st interval detection, 1st CFO, 2nd interval detection
-CFO = first_CFO(rsmooth,rcpul,IPOINT,Tsy);
-disp('hi')
+tic
+CFO = first_CFO(rsmooth,Tsy);
+disp('first CFO:')
+toc
 %%
-close all 
-rsmooth = rsmooth.* exp(-1i * 2 * pi * CFO * (1:length(rsmooth)) * Tsy / IPOINT);
-figure()
-plot(abs(rsmooth))
+%close all 
+tic
+rsmooth = rsmooth0.* exp(-1i * 2 * pi * CFO * (1:length(rsmooth0)) * Tsy / IPOINT);
+rsmooth=conv(rsmooth,rcpul);
+rsmooth=rsmooth/mean(abs(rsmooth));
+rsmooth = rsmooth(1:end-mod(length(rsmooth),IPOINT));
+rsmooth = reshape(rsmooth,IPOINT,[]);
+[maxx,indexx] = max(mean(abs(rsmooth),2));
+rsmooth = rsmooth(indexx,:);
 PilotType = 1;
 switch PilotType
     case 1
-        FACCH(rsmooth,IPOINT,Tsy,rcpul);
+        FACCH(rsmooth,Tsy);
+    case 2
+        BCCH(rsmooth,Tsy);
 end
-disp('end')
+disp("Decode:")
+toc
