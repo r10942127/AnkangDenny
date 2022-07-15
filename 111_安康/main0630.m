@@ -8,6 +8,7 @@ Ts_USRP = 1/fs_USRP;         % Sampling period
 %% Part1. 讀檔
 disp('Read data...')
 file_name = 'C:\Users\Doraemon\Desktop\安康data\2022安康data\s1';
+CH = input('Want to decode which channel? 1.FACCH 2.BCCH ');
 [fid,message] = fopen(file_name, 'r');
 Data_from_file = fread(fid , inf , 'uint16');%1e6 inf
 fclose(fid);
@@ -37,7 +38,11 @@ Tsy = 1/fsy;
 % Down converter
 data_origin = data;
 data = data_origin;%(2.2e8:2.21e8);
-f_c = fc(1);
+if CH==1
+    f_c = fc(1);
+elseif CH==2
+    f_c = fc(2);
+end
 %f_c = -99640;
 %f_c = -78103.5;
 Baseband_data = data .* exp(-1i * 2 * pi * f_c * (1:length(data)) * Ts_USRP);
@@ -86,7 +91,7 @@ rsmooth = rsmooth(1:end-mod(length(rsmooth),IPOINT));
 rsmooth = reshape(rsmooth,IPOINT,[]);
 [maxx,indexx] = max(mean(abs(rsmooth),2));
 rsmooth = rsmooth(indexx,:);
-PilotType = 1;
+PilotType = CH;
 switch PilotType
     case 1
         FACCH(rsmooth,Tsy);

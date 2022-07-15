@@ -13,14 +13,12 @@ function thre = threshold_noise_signal(rsmooth)
     end
     figure()
     plot(step_record)
-    title('thre_noise_thre')
+    title('signal noise threshold')
     step_record = step_record(step_record>700);
     diff_record = step_record(4:end)-step_record(1:end-3);
     [aaaa,index1] = min(diff_record);
     record1 = diff_record(index1:end);
     [aaaa,index2] = max(diff_record);
     index3 =3 + index1 + index2*2/3;
-    disp('thre:')
-    disp(index3)
     thre = (index3)*step_size + min_level;
 end
